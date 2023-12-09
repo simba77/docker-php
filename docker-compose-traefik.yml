@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  reverse-proxy:
+    restart: always
+    # The official v2 Traefik docker image
+    image: traefik:v2.9
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker --providers.docker.network=traefik_default
+    ports:
+      # The HTTP port
+      - "80:80"
+      - "443:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - 8081:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=${DB_HOST:-mariadb}
+      - UPLOAD_LIMIT=1G
+    networks:
+      - web
+      - default
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.phpmyadmin.rule=Host(`phpmyadmin.loc`)
+
+networks:
+  web:
+    name: traefik_default
+    external: true
