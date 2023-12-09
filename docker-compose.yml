@@ -29,7 +29,11 @@ services:
       - .:/app
       - ./.docker/php-fpm/php.ini:/usr/local/etc/php/php.ini
     labels:
-      - traefik.enable=false
+      traefik.enable: "false"
+      ofelia.enabled: "true"
+      ofelia.job-exec.php-cli.schedule: "@every 1m"
+      ofelia.job-exec.php-cli.user: www-data
+      ofelia.job-exec.php-cli.command: "php /app/public/cli.php"
   mariadb:
     image: 'mariadb:10'
     container_name: mariadb.${APP_NAMESPACE}
@@ -55,6 +59,14 @@ services:
       - '${REDIS_PORT:-}:6379'
     labels:
       - traefik.enable=false
+  ofelia:
+    image: mcuadros/ofelia:latest
+    container_name: ofelia.${APP_NAMESPACE}
+    depends_on:
+      - php-fpm
+    command: daemon --docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
 networks:
   web:
