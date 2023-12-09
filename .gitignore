@@ -1,0 +1,4 @@
+.idea
+.env
+.docker/mariadb/data/*
+.docker/redis/data/*

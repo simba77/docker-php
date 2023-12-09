@@ -1,0 +1,62 @@
+version: '3.8'
+services:
+  nginx:
+    build: .docker/nginx
+    container_name: nginx.${APP_NAMESPACE}
+    depends_on:
+      - php-fpm
+    volumes:
+      - .:/app
+      - ./.docker/nginx/vhost:/etc/nginx/conf.d
+    ports:
+      - '${NGINX_HTTP_PORT:-}:80'
+      - '${NGINX_HTTPS_PORT:-}:443'
+    networks:
+      - web
+      - default
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.web-http-${APP_NAMESPACE}.rule=Host(`${APP_HOST:-test-app.loc}`)
+      - traefik.http.routers.web-https-${APP_NAMESPACE}.rule=Host(`${APP_HOST:-test-app.loc}`)
+      - traefik.http.routers.web-https-${APP_NAMESPACE}.tls=true
+  php-fpm:
+    build: .docker/php-fpm
+    container_name: php-fpm.${APP_NAMESPACE}
+    depends_on:
+      - mariadb
+      - redis
+    volumes:
+      - .:/app
+      - ./.docker/php-fpm/php.ini:/usr/local/etc/php/php.ini
+    labels:
+      - traefik.enable=false
+  mariadb:
+    image: 'mariadb:10'
+    container_name: mariadb.${APP_NAMESPACE}
+    ports:
+      - '${FORWARD_DB_PORT:-}:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD:-rootpassword}'
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: '${DB_DATABASE:-dbname}'
+      MYSQL_USER: '${DB_USERNAME:-dbuser}'
+      MYSQL_PASSWORD: '${DB_PASSWORD:-password}'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+      - './.docker/mariadb/data:/var/lib/mysql'
+    labels:
+      - traefik.enable=false
+  redis:
+    build: .docker/redis
+    container_name: redis.${APP_NAMESPACE}
+    volumes:
+      - ./.docker/redis/data:/data
+    ports:
+      - '${REDIS_PORT:-}:6379'
+    labels:
+      - traefik.enable=false
+
+networks:
+  web:
+    name: traefik_default
+    external: true
