@@ -62,13 +62,13 @@ NGINX_HTTP_PORT и NGINX_HTTPS_PORT.
 
 Перед запуском контейнера потребуется создать сеть с именем traefik_default
 
-```bash
+```shell
 docker network create traefik_default
 ```
 
 Далее можно запустить контейнер с traefik
 
-```bash
+```shell
 docker compose up -d
 ```
 
@@ -96,19 +96,19 @@ networks:
 
 Для запуска можете использовать следующие команды
 
-```bash
+```shell
 docker compose up -d
 ```
 
 Для остановки
 
-```bash
+```shell
 docker compose stop
 ```
 
 Пересборка при изменении конфигурации
 
-```bash
+```shell
 docker compose up -d --build
 ```
 
@@ -116,18 +116,29 @@ docker compose up -d --build
 
 Запуск
 
-```bash
+```shell
 make up
 ```
 
 Остановка
 
-```bash
+```shell
 make stop
 ```
 
 Пересборка при изменении конфигурации
 
-```bash
+```shell
 make rebuild
 ```
+
+## Выполнение команд в контейнере php
+
+Если вам нужно выполнить команды в контейнере, например, установить зависимости с помощью команды composer install или
+выполнить любую другую команду можете выполнить команду
+
+```shell
+make shell
+```
+
+После выполнения команды откроется консоль внутри контейнера php-fpm в которой можете выполнять все необходимые команды.
