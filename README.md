@@ -47,7 +47,7 @@ ofelia.job-exec.php-cli.command: "php /app/public/cli.php"
 С более подробной документацией можно ознакомиться в репозитории
 проекта [https://github.com/mcuadros/ofelia](https://github.com/mcuadros/ofelia).
 
-## Traefik. Доступ к сайтам по доменному имени
+## Доступ к сайтам по доменному имени
 
 По умолчанию ваш сайт будет доступен по адресу localhost:port где port - номер пора заданный в .env файле в переменной
 NGINX_HTTP_PORT и NGINX_HTTPS_PORT.
@@ -92,7 +92,7 @@ networks:
     external: true
 ```
 
-## Запуск
+## Запуск контейнеров для работы сайта
 
 Для запуска можете использовать следующие команды
 
