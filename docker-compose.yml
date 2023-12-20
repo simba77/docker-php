@@ -45,6 +45,9 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
     volumes:
       - './.docker/mariadb/data:/var/lib/mysql'
+    networks:
+      - web
+      - default
     labels:
       - traefik.enable=false
   redis:
