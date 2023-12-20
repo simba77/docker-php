@@ -2,7 +2,6 @@ version: '3.8'
 services:
   nginx:
     build: .docker/nginx
-    container_name: nginx.${APP_NAMESPACE}
     depends_on:
       - php-fpm
     volumes:
@@ -16,12 +15,11 @@ services:
       - default
     labels:
       - traefik.enable=true
-      - traefik.http.routers.web-http-${APP_NAMESPACE}.rule=Host(`${APP_HOST:-test-app.loc}`)
-      - traefik.http.routers.web-https-${APP_NAMESPACE}.rule=Host(`${APP_HOST:-test-app.loc}`)
-      - traefik.http.routers.web-https-${APP_NAMESPACE}.tls=true
+      - traefik.http.routers.web-http-${COMPOSE_PROJECT_NAME}.rule=Host(`${APP_HOST:-test-app.loc}`)
+      - traefik.http.routers.web-https-${COMPOSE_PROJECT_NAME}.rule=Host(`${APP_HOST:-test-app.loc}`)
+      - traefik.http.routers.web-https-${COMPOSE_PROJECT_NAME}.tls=true
   php-fpm:
     build: .docker/php-fpm
-    container_name: php-fpm.${APP_NAMESPACE}
     depends_on:
       - mariadb
       - redis
@@ -35,8 +33,7 @@ services:
       ofelia.job-exec.php-cli.user: www-data
       ofelia.job-exec.php-cli.command: "php /app/public/cli.php"
   mariadb:
-    image: 'mariadb:10'
-    container_name: mariadb.${APP_NAMESPACE}
+    image: 'mariadb:11'
     ports:
       - '${FORWARD_DB_PORT:-}:3306'
     environment:
@@ -52,7 +49,6 @@ services:
       - traefik.enable=false
   redis:
     build: .docker/redis
-    container_name: redis.${APP_NAMESPACE}
     volumes:
       - ./.docker/redis/data:/data
     ports:
@@ -61,7 +57,6 @@ services:
       - traefik.enable=false
   ofelia:
     image: mcuadros/ofelia:latest
-    container_name: ofelia.${APP_NAMESPACE}
     depends_on:
       - php-fpm
     command: daemon --docker
