@@ -25,10 +25,15 @@ docker compose up -d
 
 [docker-compose.yml](docker-compose.yml) так же содержит phpmyadmin и mailhog.
 
-phpmyadmin используется для работы с базами данных
+phpmyadmin используется для работы с базами данных. Доступен по адресу https://phpmyadmin.loc
+Для работы phpmyadmin не забудьте добавить в файл hosts
+
+`127.0.0.1 phpmyadmin.loc`
 
 mailhog используется для удобного просмотра отправленных сообщений из php контейнеров. Редирект писем настраивается
 в [php.ini](..%2F.docker%2Fphp-fpm%2Fphp.ini)
+
+mailhog по умолчанию доступен по адресу http://localhost:8025
 
 ## Настройка HTTPS
 
