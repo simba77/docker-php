@@ -11,7 +11,7 @@ Traefik в данном случае используется для упрощ�
 Перед запуском контейнера потребуется создать сеть с именем traefik_default
 
 ```shell
-docker network create traefik_default
+docker network create traefik_default --label "com.docker.compose.network=default"
 ```
 
 Далее можно запустить контейнер с traefik
