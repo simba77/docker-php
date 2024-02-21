@@ -25,3 +25,5 @@ entryPoints:
     address: ":80"
   https:
     address: ":443"
+  traefik:
+    address: :8085

@@ -9,7 +9,7 @@ services:
       - "80:80"
       - "443:80"
       # The Web UI (enabled by --api.insecure=true)
-      - "8080:8080"
+      - "8085:8085"
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
@@ -17,23 +17,18 @@ services:
       - ./config/dynamic.yml:/etc/traefik/dynamic.yml:ro
       - ./certs:/tools/certs:ro
 
-  phpmyadmin:
-    image: phpmyadmin
-    container_name: phpmyadmin
+  adminer:
+    image: adminer
     restart: always
     ports:
-      - 8081:80
-    environment:
-      - PMA_ARBITRARY=1
-      - PMA_HOST=${DB_HOST:-mariadb}
-      - UPLOAD_LIMIT=1G
+      - 8080:8080
     networks:
       - web
       - default
     labels:
       - traefik.enable=true
-      - traefik.http.routers.phpmyadmin.rule=Host(`phpmyadmin.loc`)
-      - traefik.http.routers.phpmyadmin-https.rule=Host(`phpmyadmin.loc`)
+      - traefik.http.routers.phpmyadmin.rule=Host(`adminer.loc`)
+      - traefik.http.routers.phpmyadmin-https.rule=Host(`adminer.loc`)
       - traefik.http.routers.phpmyadmin-https.tls=true
 
   mailhog:
