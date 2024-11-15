@@ -33,6 +33,12 @@ certbot используется только в production режиме и по
 cp .docker/docker-compose.dev.yml docker-compose.override.yml
 ```
 
+Далее копируем папку с SSL сертификатом. Тут стоит обратить внимание, что итоговая папка должна иметь такое же название, как и значение переменной APP_HOST в .env файле.
+
+```shell
+cp -R .docker/certbot/conf/live/test-app.loc .docker/certbot/conf/live/my-app.loc
+```
+
 Далее вы можете удалить неиспользуемые сервисы из файлов docker-compose.yml и docker-compose.override.yml
 
 
