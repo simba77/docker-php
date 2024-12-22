@@ -23,6 +23,10 @@ services:
       - traefik.http.routers.web-https-${COMPOSE_PROJECT_NAME}.rule=Host(`${APP_HOST:-test-app.loc}`)
       - traefik.http.routers.web-https-${COMPOSE_PROJECT_NAME}.tls=true
 
+  mariadb:
+    networks:
+      - web
+
   php-fpm:
     build:
       context: .docker/php-fpm
