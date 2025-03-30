@@ -14,6 +14,14 @@ services:
       - ./.docker/certbot/www:/var/www/certbot/:ro
       - ./.docker/certbot/conf/:/etc/nginx/ssl/:ro
 
+  mariadb:
+    ports: !override
+      - '127.0.0.1:${FORWARD_DB_PORT:-}:3306' # Запрещает доступ в контейнер извне. При необходимости удалить.
+
+  redis:
+    ports: !override
+      - '127.0.0.1:${REDIS_PORT:-}:6379' # Запрещает доступ в контейнер извне. При необходимости удалить.
+
   certbot:
     image: certbot/certbot:latest
     volumes:
