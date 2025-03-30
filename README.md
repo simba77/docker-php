@@ -1,99 +1,126 @@
-# docker-php
+# Docker Compose для PHP-приложений (docker-php)
 
-docker compose сборка для запуска практически любых приложений на php.
+Docker Compose сборка для быстрого развертывания PHP-приложений.
+Конфигурация поддерживает режимы разработки и продакшена, используя легковесные Alpine-образы для уменьшения размера контейнеров.
+Включает основные и опциональные сервисы для удобной работы.
 
-Сборка создавалась для локальной разработки и для production режима. Основана на *-alpine образах и имеет небольшой вес.
+### Ключевые особенности
+- **Гибкость:** Легко настраивайте сервисы под нужды проекта.
+- **Изоляция:** Запускайте несколько проектов на одном компьютере без конфликтов.
+- **Готовность к продакшену:** Встроенная поддержка HTTPS с Certbot.
+- **Удобство:** Включает Composer, Redis, MariaDB, Ofelia и другие полезные инструменты.
 
-Сборка позволяет работать одновременно с несколькими проектами на одном компьютере избегая конфликтов в названии
-контейнеров и портов.
+## Содержание
 
-## Что включено в сборку?
-
-- nginx
-- php-fpm
-- composer
-- redis
-- mariadb
-- ofelia
-- certbot
-
-certbot используется только в production режиме и позволяет выпускать бесплатные SSL сертификаты от let's encrypt
-
-Дополнительно для локальной разработки вы можете использовать traefik, adminer и mailhog
-
-## Установка
-
-Для установки в ваш проект, можете скопировать папку .docker, файл docker-compose.yml и makefile
-
-Далее из папки .docker необходимо скопировать файл docker-compose.dev.yml или docker-compose.prod.yml, в зависимости от того, в каком режиме вы хотите развернуть проект, и переименовать итоговый файл в docker-compose.override.yml.
-
-Пример команды для копирования:
-
-```shell
-cp .docker/docker-compose.dev.yml docker-compose.override.yml
-```
-
-Далее копируем папку с SSL сертификатом. Тут стоит обратить внимание, что итоговая папка должна иметь такое же название, как и значение переменной APP_HOST в .env файле.
-
-```shell
-cp -R .docker/certbot/conf/live/test-app.loc .docker/certbot/conf/live/my-app.loc
-```
-
-Далее вы можете удалить неиспользуемые сервисы из файлов docker-compose.yml и docker-compose.override.yml
+1.  [Включенные сервисы](#включенные-сервисы)
+2.  [Опциональные сервисы (для локальной разработки)](#опциональные-сервисы-для-локальной-разработки)
+3.  [Структура проекта и настройка](#структура-проекта-и-настройка)
+4.  [Основные команды](#основные-команды)
+5.  [Конфигурация сервисов](#конфигурация-сервисов)
+6.  [SSL-сертификаты](#ssl-сертификаты)
+7.  [Доступ к сайтам по доменному имени](#доступ-к-сайтам-по-доменному-имени)
+8.  [Дополнительная информация](#дополнительная-информация)
 
 
-## Описание конфигурации
+## Включенные сервисы
 
-### nginx
+- **Nginx**
+- **PHP-FPM**
+- **Composer**
+- **Redis**
+- **MariaDB**
+- **Ofelia:** Планировщик задач (cron).
+- **Certbot:** Автоматическое получение SSL-сертификатов (для продакшена).
 
-Есть 2 варианта конфигурации nginx и php - prod и dev.
+## Опциональные сервисы (для локальной разработки)
 
-Настройка nginx выполняется через шаблон. Версия для разработки настраивается в файле [default.conf.dev.template](.docker/nginx/default.conf.dev.template),
-а версия для рабочего режима в файле [default.conf.template](.docker/nginx/default.conf.template)
+- **Traefik:** HTTP-прокси для доменов.
+- **Adminer:** Веб-интерфейс для MariaDB.
+- **MailHog:** Тестирование почты.
 
-В качестве DOCUMENT_ROOT используется папка public т.к. большинство современных приложений используют эту папку в
-качестве корневой.
-При необходимости вы можете изменить эту папку указанных выше файлах.
+## Структура проекта и настройка
 
+1.  **Копирование файлов:** Скопируйте `.docker/`, `docker-compose.yml` и `makefile` из репозитория проекта в корень вашего проекта. `makefile` содержит основные команды для работы с Docker Compose.
+2.  **Выбор конфигурации:** Скопируйте `docker-compose.dev.yml` (для разработки) или `docker-compose.prod.yml` (для продакшена) из каталога `.docker/` в `docker-compose.override.yml`, который должен находиться в корне проекта.
 
-Конфиги php расположены тут [php-fpm](.docker/php-fpm)
+    ```bash
+    cp .docker/docker-compose.dev.yml docker-compose.override.yml
+    ```
 
-Разбиение такое же на prod и dev. И есть общий конфиг app.ini, который работает в обоих режимах.
+3.  **Настройка SSL (для разработки и продакшена):** Используйте следующую команду для копирования сертификатов. Убедитесь, что имя **конечной** папки соответствует значению `APP_HOST` из `.env`.
 
-## Планировщик заданий
+    ```bash
+    cp -R .docker/certbot/conf/live/test-app.loc .docker/certbot/conf/live/my-app.loc
+    ```
 
-В качестве cron планировщика используется ofelia. Настраивается в файле docker-compose.override.yml в секции labels в нужном контейнере.
-Пример можно посмотреть в контейнере php-fpm
+4.  **Удаление ненужных сервисов:** Отредактируйте `docker-compose.yml` и `docker-compose.override.yml`, удалив ненужные сервисы.
+5.  **Настройка окружения:** Отредактируйте `.env` файл.
 
-```yaml
-ofelia.enabled: "true"
-ofelia.job-exec.php-cli.schedule: "@every 1m"
-ofelia.job-exec.php-cli.user: www-data
-ofelia.job-exec.php-cli.command: "php /app/public/cli.php"
-```
+## Основные команды
 
-С более подробной документацией можно ознакомиться в репозитории
-проекта [https://github.com/mcuadros/ofelia](https://github.com/mcuadros/ofelia).
+* **Запуск:** `make up` или `docker compose up -d`
+* **Остановка:** `make stop` или `docker compose stop`
+* **Пересборка:** `make rebuild` или `docker compose up -d --build`
+* **Консоль PHP:** `make shell`
+
+## Конфигурация сервисов
+
+* **Nginx:** Настраивается через `default.conf.template` (для продакшена) и `default.conf.dev.template` (для разработки), расположенные в каталоге `.docker/nginx/`.
+* **PHP-FPM:**
+    * Версия PHP изменяется в `.docker/php-fpm/Dockerfile`.
+    * Общие настройки находятся в `.docker/php-fpm/app.ini`.
+    * Конфигурация для prod версии находится в файле `.docker/php-fpm/app.prod.ini`.
+    * Конфигурация для dev версии находится в файле `.docker/php-fpm/app.dev.ini`.
+* **Ofelia:** Настраивается в `docker-compose.override.yml` через `labels`.
+
+  Пример конфигурации для запуска скрипта `cli.php` каждую минуту:
+
+    ```yaml
+    ofelia.enabled: "true"
+    ofelia.job-exec.php-cli.schedule: "@every 1m"
+    ofelia.job-exec.php-cli.user: www-data
+    ofelia.job-exec.php-cli.command: "php /app/public/cli.php"
+    ```
+
+## SSL-сертификаты
+
+* **Получение:** Используйте следующую команду для получения SSL-сертификатов. Замените `domain.com` и `www.domain.com` на ваши доменные имена.
+
+    ```bash
+    docker compose run --rm certbot certonly --webroot --webroot-path /var/www/certbot/ -d domain.com -d www.domain.com
+    ```
+
+* **Обновление:** Используйте следующую команду для обновления истекших SSL-сертификатов.
+
+    ```bash
+    docker compose run --rm certbot renew
+    ```
+
+* **Автоматизация:** Добавьте следующую задачу в cron для автоматического обновления сертификатов. Замените `/home/user/project_path` на путь к вашему проекту.
+
+    ```bash
+    0 5 * * * cd /home/user/project_path && docker compose run --rm certbot renew
+    ```
 
 ## Доступ к сайтам по доменному имени
 
-По умолчанию ваш сайт будет доступен по адресу localhost:port где port - номер пора заданный в .env файле в переменной
-NGINX_HTTP_PORT и NGINX_HTTPS_PORT.
-Для доступа к сайту по домену можно использовать traefik в качестве прокси сервера.
+По умолчанию ваш сайт будет доступен по адресу `localhost:port`, где `port` — номер порта, заданный в `.env` файле в переменных `NGINX_HTTP_PORT` и `NGINX_HTTPS_PORT`.
 
-Домен по которому будет доступен ваш локальный сайт задается в .env в переменной APP_HOST и NGINX_SERVER_NAME
+Для доступа к сайту по доменному имени можно использовать Traefik в качестве прокси-сервера.
 
-В переменной NGINX_SERVER_NAME можно указать несколько доменов через пробел.
+Домен, по которому будет доступен ваш локальный сайт, задается в `.env` файле в переменных `APP_HOST` и `NGINX_SERVER_NAME`.
 
-Чтобы сайт был доступен в браузере нужно добавить в файл hosts на вашем компьютере строку с доменом и ip
+В переменной `NGINX_SERVER_NAME` можно указать несколько доменов через пробел.
+
+Чтобы сайт был доступен в браузере, нужно добавить в файл `hosts` на вашем компьютере строку с доменом и IP-адресом:
 
 `127.0.0.1 test-app.loc`
 
-test-app.loc замените на свой домен который указали в файле .env.
+Замените `test-app.loc` на ваш домен, указанный в файле `.env`.
 
-Подробнее с конфигурацией traefik можно ознакомиться в папке [traefik](traefik/README.md)
+Подробнее с конфигурацией Traefik можно ознакомиться в каталоге [traefik](traefik/README.md).
 
-**Если вы не хотите использовать traefik, вам нужно будет удалить секцию networks из docker-compose.override.yml**
+**Если вы не хотите использовать Traefik, вам нужно будет удалить секцию `networks` из `docker-compose.override.yml`:**
 
 ```yaml
 networks:
@@ -102,81 +129,7 @@ networks:
     external: true
 ```
 
-## Запуск контейнеров для работы сайта
+## Дополнительная информация
 
-Для запуска можете использовать следующие команды
-
-```shell
-docker compose up -d
-```
-
-Для остановки
-
-```shell
-docker compose stop
-```
-
-Пересборка при изменении конфигурации
-
-```shell
-docker compose up -d --build
-```
-
-Если у вас установлена утилита make, то можете выполнять сокращенные команды
-
-Запуск
-
-```shell
-make up
-```
-
-Остановка
-
-```shell
-make stop
-```
-
-Пересборка при изменении конфигурации
-
-```shell
-make rebuild
-```
-
-## Выполнение команд в контейнере php
-
-Если вам нужно выполнить команды в контейнере, например, установить зависимости с помощью команды composer install или
-выполнить любую другую команду можете выполнить команду
-
-```shell
-make shell
-```
-
-После выполнения команды откроется консоль внутри контейнера php-fpm в которой можете выполнять все необходимые команды.
-
-В makefile так же доступны дополнительные команды которые могут вам пригодиться.
-
-## Изменение версии php
-
-Изменить версию php можно в этом файле: [Dockerfile](.docker%2Fphp-fpm%2FDockerfile)
-В строке FROM php:8.2-fpm-alpine замените название образа на любой из доступных здесь https://hub.docker.com/_/php/tags
-В большинстве случаев достаточно просто сменить цифру 8.2 на необходимую вам.
-
-## Выпуск SSL сертификатов
-
-Для выпуска сертификата используется команда:
-
-```shell
-docker compose run --rm  certbot certonly --webroot --webroot-path /var/www/certbot/ -d domain.com -d www.domain.com
-```
-
-после выполнения команды следуйте инструкциям.
-
-Для перевыпуска сертификатов с истекшим сроком действия используется команда:
-
-```shell
-docker compose run --rm certbot renew
-```
-
-Для автоматизации перевыпуска ставим задание на крон:
-
-`0 5 * * * cd /home/user/project_path && docker compose run --rm certbot renew`
+* Документация Ofelia: [https://github.com/mcuadros/ofelia](https://github.com/mcuadros/ofelia)
+* Версии PHP: [https://hub.docker.com/_/php/tags](https://hub.docker.com/_/php/tags)
