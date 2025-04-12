@@ -1,67 +1,69 @@
 # Traefik
 
-Traefik выступает в роли обратного прокси-сервера, автоматически маршрутизируя запросы к локальным доменам в соответствующие контейнеры.
+[Русская версия](README_RU.md)
 
-## Принцип работы
+Traefik acts as a reverse proxy, automatically routing requests to local domains to the corresponding containers.
 
-1.  **Запуск Traefik:** Traefik запускается как контейнер Docker Compose и прослушивает входящие HTTP/HTTPS-запросы.
-2.  **Маршрутизация запросов:** Traefik анализирует заголовки `Host` в запросах и на основе правил, определенных в `docker-compose.yml`, перенаправляет запросы в нужные контейнеры PHP-приложений.
-3.  **Управление доменами:** Traefik позволяет использовать удобные локальные домены (например, `myapp.loc`) вместо `localhost:port` для доступа к приложениям.
+## How it works
 
-## Настройка и запуск
+1. **Traefik operation:** Traefik runs as a Docker Compose container and listens for incoming HTTP/HTTPS requests.
+2. **Request routing:** Traefik analyzes the `Host` headers in the requests and, based on the rules defined in `docker-compose.yml`, redirects the requests to the necessary PHP application containers.
+3. **Domain management:** Traefik allows the use of convenient local domains (e.g., `myapp.loc`) instead of `localhost:port` for accessing applications.
 
-1.  **Размещение конфигурации:** Рекомендуется разместить папку `traefik/` отдельно от проекта PHP-приложения.
-2.  **Запуск Traefik:** Запустите контейнер Traefik с помощью Docker Compose:
+## Setup and Run
+
+1. **Configuration placement:** It is recommended to place the `traefik/` folder separately from the PHP application project.
+2. **Traefik execution:** Run the Traefik container using Docker Compose:
 
     ```bash
     docker compose up -d
     ```
 
-3.  **Проверка сети:** После запуска должна появиться сеть `traefik_default`. Все контейнеры PHP-приложений, которые должны быть доступны через Traefik, должны быть подключены к этой сети.
+3. **Network check:** After execution, the `traefik_default` network should appear. All PHP application containers that should be accessible via Traefik must be connected to this network.
 
-    * Если сеть не создалась автоматически, создайте её вручную:
+    * If the network is not created automatically, create it manually:
 
         ```bash
         docker network create traefik_default --label "com.docker.compose.network=default"
         ```
 
-4.  **Автоматический запуск:** Traefik настроен на автоматический запуск при перезапуске Docker или компьютера (`restart: always`). При необходимости измените этот параметр в `docker-compose.yml`.
+4. **Automatic start:** Traefik is configured to start automatically when Docker or the computer is restarted (`restart: always`). If necessary, change this parameter in `docker-compose.yml`.
 
-## Включенные сервисы
+## Included Services
 
-* **Adminer:** Веб-интерфейс для управления базами данных MariaDB. Доступен по адресу `https://adminer.loc`.
-    * Добавьте запись в файл `hosts`: `127.0.0.1 adminer.loc`.
-    * В окне авторизации Adminer:
-        * `Server`: имя контейнера MariaDB.
-        * `Username/Password`: учетные данные из `.env` или значения по умолчанию из `docker-compose.yml`.
-* **MailHog:** Инструмент для перехвата и просмотра исходящих писем из PHP-приложений. Доступен по адресу `http://localhost:8025`.
-    * Редирект писем настраивается в файле `php.ini` (`.docker/php-fpm/app.dev.ini`).
+* **Adminer:** A web interface for managing MariaDB databases. Available at `https://adminer.loc`.
+    * Add an entry to the `hosts` file: `127.0.0.1 adminer.loc`.
+    * In the Adminer login window:
+        * `Server`: the name of the MariaDB container.
+        * `Username/Password`: credentials from `.env` or default values from `docker-compose.yml`.
+* **MailHog:** A tool for intercepting and viewing outgoing emails from PHP applications. Available at `http://localhost:8025`.
+    * Email redirection is configured in the `php.ini` file (`.docker/php-fpm/app.dev.ini`).
 
-## Настройка HTTPS с mkcert
+## HTTPS Configuration with mkcert
 
-1.  **Установка mkcert:** Установите утилиту `mkcert` ([https://github.com/FiloSottile/mkcert](https://github.com/FiloSottile/mkcert)) для генерации локальных SSL-сертификатов.
-2.  **Генерация сертификатов:** Сгенерируйте сертификаты для локальных доменов:
+1. **mkcert installation:** Install the `mkcert` utility ([https://github.com/FiloSottile/mkcert](https://github.com/FiloSottile/mkcert)) to generate local SSL certificates.
+2. **Certificate generation:** Generate certificates for local domains:
 
     ```bash
     mkcert -cert-file certs/local-cert.pem -key-file certs/local-key.pem "localhost" "*.localhost" "adminer.loc" "myapp.loc" "yourdomain.loc"
     ```
 
-    * Перечислите все необходимые домены через пробел.
-    * Wildcard-сертификаты для корневых доменов (`*.loc`) могут не работать в некоторых браузерах.
+    * List all necessary domains separated by a space.
+    * Wildcard certificates for root domains (`*.loc`) may not work in some browsers.
 
-3.  **Использование Makefile:** В `Makefile` уже есть команда `gen-cert` для удобной генерации сертификатов. Отредактируйте её, добавив нужные домены в список:
+3. **Makefile usage:** The `Makefile` already has a `gen-cert` command for convenient certificate generation. Edit it by adding the necessary domains to the list:
 
     ```makefile
     gen-cert:
         mkcert -cert-file certs/local-cert.pem -key-file certs/local-key.pem "localhost" "*.localhost" "adminer.loc" "myapp.loc" "yourdomain.loc"
     ```
 
-    * Затем выполните команду `make gen-cert`.
+    * Then run the `make gen-cert` command.
 
-4.  **Перезапуск Traefik:** После генерации сертификатов необходимо перезапустить контейнер Traefik, чтобы он подхватил новые сертификаты, используя команду `make restart`:
+4. **Traefik restart:** After generating the certificates, you need to restart the Traefik container for it to pick up the new certificates, using the `make restart` command:
 
     ```bash
     make restart
     ```
 
-5.  **Доступ по HTTPS:** После перезапуска контейнера локальные сайты будут доступны по HTTPS без предупреждений о недоверенном сертификате в браузере.
+5. **HTTPS access:** After restarting the container, local sites will be accessible via HTTPS without warnings about an untrusted certificate in the browser.
