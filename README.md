@@ -1,79 +1,81 @@
-# Docker Compose для PHP-приложений (docker-php)
+# Docker Compose setup for PHP Applications (docker-php) 
 
-Docker Compose сборка для быстрого развертывания PHP-приложений.
-Конфигурация поддерживает режимы разработки и продакшена, используя легковесные Alpine-образы для уменьшения размера контейнеров.
-Включает основные и опциональные сервисы для удобной работы.
+[Русская версия](README_RU.md)
 
-### Ключевые особенности
-- **Гибкость:** Легко настраивайте сервисы под нужды проекта.
-- **Изоляция:** Запускайте несколько проектов на одном компьютере без конфликтов.
-- **Готовность к продакшену:** Встроенная поддержка HTTPS с Certbot.
-- **Удобство:** Включает Composer, Redis, MariaDB, Ofelia и другие полезные инструменты.
+Docker Compose setup for quick deployment of PHP applications.
+The configuration supports development and production modes, using lightweight Alpine images to reduce container size.
+Includes basic and optional services for convenient work.
 
-## Содержание
+### Key Features
+- **Flexibility:** Easily configure services to suit the project needs.
+- **Isolation:** Run multiple projects on one computer without conflicts.
+- **Production-ready:** Built-in HTTPS support with Certbot.
+- **Convenience:** Includes Composer, Redis, MariaDB, Ofelia and other useful tools.
 
-1.  [Включенные сервисы](#включенные-сервисы)
-2.  [Опциональные сервисы (для локальной разработки)](#опциональные-сервисы-для-локальной-разработки)
-3.  [Структура проекта и настройка](#структура-проекта-и-настройка)
-4.  [Основные команды](#основные-команды)
-5.  [Конфигурация сервисов](#конфигурация-сервисов)
-6.  [SSL-сертификаты](#ssl-сертификаты)
-7.  [Доступ к сайтам по доменному имени](#доступ-к-сайтам-по-доменному-имени)
-8.  [Ограничение доступа к сервисам](#ограничение-доступа-к-сервисам)
-9.  [Дополнительная информация](#дополнительная-информация)
+## Contents
 
-## Включенные сервисы
+1.  [Included Services](#included-services)
+2.  [Optional Services (for local development)](#optional-services-for-local-development)
+3.  [Project Structure and Configuration](#project-structure-and-configuration)
+4.  [Basic Commands](#basic-commands)
+5.  [Service Configuration](#service-configuration)
+6.  [SSL Certificates](#ssl-certificates)
+7.  [Access to Sites by Domain Name](#access-to-sites-by-domain-name)
+8.  [Restricting Access to Services](#restricting-access-to-services)
+9.  [Additional Information](#additional-information)
+
+## Included Services
 
 - **Nginx**
 - **PHP-FPM**
 - **Composer**
 - **Redis**
 - **MariaDB**
-- **Ofelia:** Планировщик задач (cron).
-- **Certbot:** Автоматическое получение SSL-сертификатов (для продакшена).
+- **Ofelia:** Task scheduler (cron).
+- **Certbot:** Automatic retrieval of SSL certificates (for production).
 
-## Опциональные сервисы (для локальной разработки)
+## Optional Services (for local development)
 
-- **Traefik:** HTTP-прокси для доменов.
-- **Adminer:** Веб-интерфейс для MariaDB.
-- **MailHog:** Тестирование почты.
+- **Traefik:** HTTP proxy for domains.
+- **Adminer:** Web interface for MariaDB.
+- **MailHog:** Mail testing.
 
-## Структура проекта и настройка
+## Project Structure and Configuration
 
-1.  **Копирование файлов:** Скопируйте `.docker/`, `docker-compose.yml` и `makefile` из репозитория проекта в корень вашего проекта. `makefile` содержит основные команды для работы с Docker Compose.
-2.  **Выбор конфигурации:** Скопируйте `docker-compose.dev.yml` (для разработки) или `docker-compose.prod.yml` (для продакшена) из каталога `.docker/` в `docker-compose.override.yml`, который должен находиться в корне проекта.
+1. **Copy files:** Copy `.docker/`, `docker-compose.yml` and `makefile` from the project repository to the root of your project. `makefile` contains the basic commands for working with Docker Compose.
+2. **Select configuration:** Copy `docker-compose.dev.yml` (for development) or `docker-compose.prod.yml` (for production) from the `.docker/` directory to `docker-compose.override.yml`, which should be located in the project root.
 
     ```bash
     cp .docker/docker-compose.dev.yml docker-compose.override.yml
     ```
 
-3.  **Настройка SSL (для разработки и продакшена):** Используйте следующую команду для копирования сертификатов. Убедитесь, что имя **конечной** папки соответствует значению `APP_HOST` из `.env`.
+3. **Configure SSL (for development and production):** Use the following command to copy the certificates. Ensure that the name of the **destination** folder matches the value of `APP_HOST` from `.env`.
 
     ```bash
     cp -R .docker/certbot/conf/live/test-app.loc .docker/certbot/conf/live/my-app.loc
     ```
 
-4.  **Удаление ненужных сервисов:** Отредактируйте `docker-compose.yml` и `docker-compose.override.yml`, удалив ненужные сервисы.
-5.  **Настройка окружения:** Отредактируйте `.env` файл.
+4. **Remove unnecessary services:** Edit `docker-compose.yml` and `docker-compose.override.yml`, removing unnecessary services.
+5. **Configure environment:** Edit the `.env` file.
 
-## Основные команды
+## Basic Commands
 
-* **Запуск:** `make up` или `docker compose up -d`
-* **Остановка:** `make stop` или `docker compose stop`
-* **Пересборка:** `make rebuild` или `docker compose up -d --build`
-* **Консоль PHP:** `make shell`
+* **Run:** `make up` or `docker compose up -d`
+* **Stop:** `make stop` or `docker compose stop`
+* **Rebuild:** `make rebuild` or `docker compose up -d --build`
+* **PHP Console:** `make shell`
 
-## Конфигурация сервисов
+## Service Configuration
 
-* **Nginx:** Настраивается через `default.conf.template` (для продакшена) и `default.conf.dev.template` (для разработки), расположенные в каталоге `.docker/nginx/`.
+* **Nginx:** Configured via `default.conf.template` (for production) and `default.conf.dev.template` (for development), located in the `.docker/nginx/` directory.
 * **PHP-FPM:**
-    * Версия PHP изменяется в `.docker/php-fpm/Dockerfile`.
-    * Общие настройки находятся в `.docker/php-fpm/app.ini`.
-    * Конфигурация для prod версии находится в файле `.docker/php-fpm/app.prod.ini`.
-    * Конфигурация для dev версии находится в файле `.docker/php-fpm/app.dev.ini`.
-* **Ofelia:** Настраивается в `docker-compose.override.yml` через `labels`.
+    * PHP version is changed in `.docker/php-fpm/Dockerfile`.
+    * General settings are in `.docker/php-fpm/app.ini`.
+    * Configuration for prod version is in the file `.docker/php-fpm/app.prod.ini`.
+    * Configuration for dev version is in the file `.docker/php-fpm/app.dev.ini`.
+* **Ofelia:** Configured in `docker-compose.override.yml` via `labels`.
 
-  Пример конфигурации для запуска скрипта `cli.php` каждую минуту:
+  Example configuration for running the `cli.php` script every minute:
 
     ```yaml
     ofelia.enabled: "true"
@@ -82,45 +84,45 @@ Docker Compose сборка для быстрого развертывания P
     ofelia.job-exec.php-cli.command: "php /app/public/cli.php"
     ```
 
-## SSL-сертификаты
+## SSL Certificates
 
-* **Получение:** Используйте следующую команду для получения SSL-сертификатов. Замените `domain.com` и `www.domain.com` на ваши доменные имена.
+* **Obtain:** Use the following command to obtain SSL certificates. Replace `domain.com` and `www.domain.com` with your domain names.
 
     ```bash
     docker compose run --rm certbot certonly --webroot --webroot-path /var/www/certbot/ -d domain.com -d www.domain.com
     ```
 
-* **Обновление:** Используйте следующую команду для обновления истекших SSL-сертификатов.
+* **Update:** Use the following command to update expired SSL certificates.
 
     ```bash
     docker compose run --rm certbot renew
     ```
 
-* **Автоматизация:** Добавьте следующую задачу в cron для автоматического обновления сертификатов. Замените `/home/user/project_path` на путь к вашему проекту.
+* **Automate:** Add the following task to cron for automatic certificate renewal. Replace `/home/user/project_path` with the path to your project.
 
     ```bash
     0 5 * * * cd /home/user/project_path && docker compose run --rm certbot renew
     ```
 
-## Доступ к сайтам по доменному имени
+## Access to Sites by Domain Name
 
-По умолчанию ваш сайт будет доступен по адресу `localhost:port`, где `port` — номер порта, заданный в `.env` файле в переменных `NGINX_HTTP_PORT` и `NGINX_HTTPS_PORT`.
+By default, your site will be accessible at `localhost:port`, where `port` is the port number specified in the `.env` file in the `NGINX_HTTP_PORT` and `NGINX_HTTPS_PORT` variables.
 
-Для доступа к сайту по доменному имени можно использовать Traefik в качестве прокси-сервера.
+To access the site by domain name, you can use Traefik as a proxy server.
 
-Домен, по которому будет доступен ваш локальный сайт, задается в `.env` файле в переменных `APP_HOST` и `NGINX_SERVER_NAME`.
+The domain by which your local site will be accessible is specified in the `.env` file in the `APP_HOST` and `NGINX_SERVER_NAME` variables.
 
-В переменной `NGINX_SERVER_NAME` можно указать несколько доменов через пробел.
+In the `NGINX_SERVER_NAME` variable, you can specify multiple domains separated by a space.
 
-Чтобы сайт был доступен в браузере, нужно добавить в файл `hosts` на вашем компьютере строку с доменом и IP-адресом:
+For the site to be accessible in the browser, you need to add a line with the domain and IP address to the `hosts` file on your computer:
 
 `127.0.0.1 test-app.loc`
 
-Замените `test-app.loc` на ваш домен, указанный в файле `.env`.
+Replace `test-app.loc` with your domain specified in the `.env` file.
 
-Подробнее с конфигурацией Traefik можно ознакомиться в каталоге [traefik](traefik/README.md).
+More details on Traefik configuration can be found in the [traefik](traefik/README.md) directory.
 
-**Если вы не хотите использовать Traefik, вам нужно будет удалить секцию `networks` из `docker-compose.override.yml`:**
+**If you do not want to use Traefik, you will need to remove the `networks` section from `docker-compose.override.yml`:**
 
 ```yaml
 networks:
@@ -129,14 +131,14 @@ networks:
     external: true
 ```
 
-## Ограничение доступа к сервисам
+## Restricting Access to Services
 
-По умолчанию в production режиме для контейнеров mariadb и redis доступ извне ограничен.
-В зависимости от конфигурации сети вам может не понадобиться данное ограничение или же оно может работать неправильно.
+By default, in production mode, external access to mariadb and redis containers is restricted.
+Depending on the network configuration, this restriction may not be necessary or may not work correctly.
 
-В этом случае удалите `127.0.0.1:` из docker-compose.override.yml для соответствующих сервисов, но не забудьте ограничить доступ к портам т.к. это влияет на безопасность.
+In this case, remove 127.0.0.1: from docker-compose.override.yml for the respective services, but do not forget to restrict access to the ports, as this affects security.
 
-## Дополнительная информация
+## Additional Information
 
-* Документация Ofelia: [https://github.com/mcuadros/ofelia](https://github.com/mcuadros/ofelia)
-* Версии PHP: [https://hub.docker.com/_/php/tags](https://hub.docker.com/_/php/tags)
+* Ofelia Documentation: [https://github.com/mcuadros/ofelia](https://github.com/mcuadros/ofelia)
+* PHP Versions: [https://hub.docker.com/_/php/tags](https://hub.docker.com/_/php/tags)
