@@ -3,9 +3,14 @@ FROM php:8.3-fpm-alpine AS php_base
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/install-php-extensions && \
-    install-php-extensions gd opcache pdo_mysql zip intl redis exif
-
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    install-php-extensions gd \
+    opcache \
+    pdo_mysql \
+    zip \
+    intl \
+    redis \
+    exif \
+    @composer
 
 COPY --link app.ini $PHP_INI_DIR/conf.d/
 
