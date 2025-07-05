@@ -1,18 +1,20 @@
 -include .env
 
+USER_ID ?= $(shell id -u)
+
 restart: stop up
 
 build:
 	@echo "Building containers"
-	@docker compose --env-file .env build
+	@USER_ID=$(USER_ID) docker compose --env-file .env build
 
 up:
 	@echo "Starting containers"
-	@docker compose --env-file .env up -d --remove-orphans
+	@USER_ID=$(USER_ID) docker compose --env-file .env up -d --remove-orphans
 
 rebuild:
 	@echo "Rebuilding containers"
-	@docker compose up -d --build
+	@USER_ID=$(USER_ID) docker compose up -d --build
 
 stop:
 	@echo "Stopping containers"

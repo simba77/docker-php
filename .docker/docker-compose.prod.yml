@@ -30,7 +30,6 @@ services:
 
   php-fpm:
     build:
-      context: .docker/php-fpm
       target: php_prod
     volumes:
       - .:/app

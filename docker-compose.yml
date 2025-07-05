@@ -18,6 +18,10 @@ services:
         max-file: "3"
 
   php-fpm:
+    build:
+      context: .docker/php-fpm
+      args:
+        USER_ID: ${USER_ID:-1000}
     restart: unless-stopped
     container_name: ${COMPOSE_PROJECT_NAME}.php-fpm
     depends_on:
@@ -81,6 +85,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     labels:
       - traefik.enable=false
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   database_data:
