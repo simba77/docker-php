@@ -1,7 +1,7 @@
 services:
   reverse-proxy:
     restart: always
-    image: traefik:v2.9
+    image: traefik:v3.6
     ports:
       # The HTTP port
       - "80:80"
